@@ -118,12 +118,26 @@ def check_window():
     layout = yaml.safe_load((ROOT / "vision" / "layout.yaml").read_text(encoding="utf-8"))
     want = tuple(layout["window_size"])
     try:
-        from vision.capture import make_capture
+        from vision.capture import WindowNotFoundError, make_capture
         cap = make_capture(WINDOW_NAME)
-    except Exception as e:
-        report("FAIL", "WoW window", f"not found ({e}). Is WoW running?")
+    except ImportError as e:
+        # A missing or outdated bot file, or a missing package: not a WoW problem.
+        report("FAIL", "Capture backend", f"failed to load ({e}). Update the bot files and "
+               "run: pip install -r requirements.txt")
         return None
-    size = cap.size()
+    except Exception as e:
+        report("FAIL", "Capture backend", f"failed to start: {e}")
+        return None
+    try:
+        size = cap.size()  # the first call is where the window is actually looked up
+    except WindowNotFoundError as e:
+        report("FAIL", "WoW window", f"{e}. Is WoW running, in Fullscreen (Windowed), not minimized?")
+        cap.close()
+        return None
+    except Exception as e:
+        report("FAIL", "WoW window", f"couldn't read the window: {e}")
+        cap.close()
+        return None
     if size != want:
         report("FAIL", "WoW window size", f"{size[0]}x{size[1]}, need {want[0]}x{want[1]} fullscreen")
         cap.close()

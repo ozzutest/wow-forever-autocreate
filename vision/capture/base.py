@@ -19,6 +19,11 @@ class WindowCapture(Protocol):
         """Return (width, height) of the window's client area."""
         ...
 
+    @property
+    def window_id(self) -> int:
+        """Native window id (X11 window id, or HWND on Windows)."""
+        ...
+
     def close(self) -> None: ...
 
 
@@ -27,9 +32,6 @@ def make_capture(window_name: str) -> WindowCapture:
         from .x11 import X11Capture
         return X11Capture(window_name)
     if sys.platform == "win32":
-        from .win32 import WindowsCapture
-        return WindowsCapture(window_name)
+        from .win32 import Win32Capture
+        return Win32Capture(window_name)
     raise RuntimeError(f"unsupported platform: {sys.platform}")
-
-
-
