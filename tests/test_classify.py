@@ -26,6 +26,7 @@ PREFIXES = {
     "char_customize": State.CHAR_CUSTOMIZE,
     "unknown": State.UNKNOWN,
     "fatal": State.FATAL,
+    "error_dialog": State.ERROR,       # full frames only; crops live in approx/
 }
 
 
@@ -49,6 +50,14 @@ def _full_frames(prefix: str = ""):
 def test_classify_fixture(path):
     obs = classify(cv2.imread(str(path)), TITLES)
     assert obs.state is PREFIXES[_longest(path.name, PREFIXES)], obs.text
+
+
+def test_small_frame_does_not_crash():
+    # e.g. a crop saved under a full-frame name: no dialog box fits, nothing should raise
+    small = cv2.imread(str(FIXTURES / "approx" / "fatal_max_characters_01.png"))
+    if small is None:
+        pytest.skip("no approx/fatal_max_characters_01.png")
+    classify(small, TITLES)
 
 
 def test_black_frame_is_unknown():

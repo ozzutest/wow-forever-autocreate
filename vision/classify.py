@@ -77,10 +77,12 @@ def classify(frame: np.ndarray, ruleset_titles: list[str]) -> Observation:
         return Observation(_DIALOG_STATES[dialog.kind], dialog=dialog, text=dialog.message)
 
     center = normalize(dialog.message)
-    if fuzzy_contains(center, "reconnect"):
-        return Observation(State.RECONNECT, text=center)
     if fuzzy_contains(center, "email or phone") or fuzzy_contains(center, "password"):
         return Observation(State.LOGIN_FORM, text=center)
+    # Right after a disconnect the Reconnect button is highlighted (white label, invisible
+    # to the gold mask); the Log Out label below it stays gold.
+    if fuzzy_contains(center, "reconnect") or fuzzy_contains(center, "log out"):
+        return Observation(State.RECONNECT, text=center)
 
     subtitle = _joined(frame, SUBTITLE_BOX)
     if fuzzy_contains(subtitle, "same ruleset"):

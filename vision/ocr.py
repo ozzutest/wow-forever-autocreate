@@ -52,6 +52,7 @@ RED_CLOSE_KERNEL = (5, 15) # joins the label gap inside a button
 BUTTON_W = (120, 400)      # calibrated on dialog fixtures
 BUTTON_H = (18, 60)
 BUTTON_MIN_ASPECT = 3      # buttons are wide: w > 3 * h
+BUTTON_ROW_TOLERANCE = 10  # px: buttons whose centers differ less than this are on one row
 
 # ---- Regions
 DIALOG_BOX = (560, 300, 1360, 760)        # center of the frame, where dialogs appear
@@ -72,8 +73,8 @@ QUEUE_MESSAGE = "login servers are full"
 QUEUE_POSITION_RE = r"position in queue (\d+)"
 FATAL_MESSAGES = ("maximum number",)
 OKAY_LABEL = "okay"
-BUTTON_LABELS = ("okay", "cancel")        # left out of Dialog.message
-ERROR_CODE_RE = r"wow\d{5,}"
+BUTTON_LABELS = ("okay", "cancel", "help")  # dialog button words: not part of the message
+ERROR_CODE_RE = r"(?:wow|blz)\d{5,}"    # e.g. WOW51900319, BLZ51901016
 
 # Known errors, keyed for the retry policy in states/dialogs.py.
 # One distinctive keyword per error: a whole phrase breaks as soon as OCR drops one word.
@@ -88,6 +89,8 @@ KNOWN_ERRORS = {
 # Backup key: digits OCR more reliably than words.
 ERROR_CODES = {
     "WOW51900319": "disconnected",
+    "WOW51900328": "disconnected",   # network gone (cable unplugged)
+    "BLZ51901016": "disconnected",   # Reconnect while the network is still gone
     "WOW51900309": "no_realms",
 }
 
@@ -139,8 +142,21 @@ def _gold_mask(roi: np.ndarray) -> np.ndarray:
     return 255 - mask  # dark text on white
 
 
+EMPTY_OCR = {k: [] for k in ("text", "conf", "left", "top", "width", "height",
+                              "block_num", "par_num", "line_num")}
+
+
+def _clip(frame: np.ndarray, box: tuple[int, int, int, int] | None) -> tuple[int, int, int, int]:
+    """Box limited to the frame, so a smaller frame (a crop) gives a smaller region, not a crash."""
+    h, w = frame.shape[:2]
+    x0, y0, x1, y1 = box or (0, 0, w, h)
+    return max(0, x0), max(0, y0), min(w, x1), min(h, y1)
+
+
 def _ocr(frame: np.ndarray, box: tuple[int, int, int, int] | None):
-    x0, y0, x1, y1 = box or (0, 0, frame.shape[1], frame.shape[0])
+    x0, y0, x1, y1 = _clip(frame, box)
+    if x1 <= x0 or y1 <= y0:
+        return EMPTY_OCR, (x0, y0)
     data = pytesseract.image_to_data(
         _gold_mask(frame[y0:y1, x0:x1]), config=TESS_BLOCK, output_type=pytesseract.Output.DICT
     )
@@ -175,7 +191,9 @@ def red_buttons(frame: np.ndarray, box: tuple[int, int, int, int] | None = None)
 
     Fallback for when OCR misses the button label.
     """
-    x0, y0, x1, y1 = box or (0, 0, frame.shape[1], frame.shape[0])
+    x0, y0, x1, y1 = _clip(frame, box)
+    if x1 <= x0 or y1 <= y0:
+        return []
     h, s, v = cv2.split(cv2.cvtColor(frame[y0:y1, x0:x1], cv2.COLOR_BGR2HSV))
     mask = (((h <= RED_H_LOW_MAX) | (h >= RED_H_HIGH_MIN)) & (s > RED_S_MIN) & (v > RED_V_MIN))
     mask = cv2.morphologyEx(mask.astype(np.uint8) * 255, cv2.MORPH_CLOSE,
@@ -233,10 +251,17 @@ def read_dialog(frame: np.ndarray, box: tuple[int, int, int, int] | None = DIALO
     okay = next((_center(data, i, origin) for i, t in enumerate(data["text"])
                  if normalize(t) == OKAY_LABEL), None)
     if okay is None and (known or error_code) and lines:
-        # label not read: take the first red button below the message
-        bottom = max(w.center[1] for l in lines for w in l.words)
-        okay = next((b for b in red_buttons(frame, box) if b[1] > bottom), None)
-    message = " ".join(l.text for l in lines if normalize(l.text) not in BUTTON_LABELS)
+        # Label not read: take the first row of red buttons below the message, and in it the
+        # rightmost button. Dialogs with two buttons put Help left and Okay right.
+        msg_ys = [w.center[1] for l in lines for w in l.words if normalize(w.text) not in BUTTON_LABELS]
+        bottom = max(msg_ys) if msg_ys else origin[1]
+        below = [b for b in red_buttons(frame, box) if b[1] > bottom]
+        if below:
+            row_y = min(b[1] for b in below)
+            okay = max((b for b in below if b[1] - row_y <= BUTTON_ROW_TOLERANCE), key=lambda b: b[0])
+    message = " ".join(" ".join(w.text for w in l.words if normalize(w.text) not in BUTTON_LABELS)
+                       for l in lines).strip()
+    message = re.sub(r"\s+", " ", message)
 
     if any(m in joined for m in FATAL_MESSAGES):
         return Dialog(DialogKind.FATAL, message, error_code, okay=okay)
@@ -273,7 +298,9 @@ def read_rulesets(
     OCR'd text is fuzzy-matched to the known titles ("PyP" -> "PvP").
     Availability comes from title brightness (see TITLE_BRIGHT_*).
     """
-    x0, y0, x1, y1 = band
+    x0, y0, x1, y1 = _clip(frame, band)
+    if x1 <= x0 or y1 <= y0:
+        return []
     h, s, v = cv2.split(cv2.cvtColor(frame[y0:y1, x0:x1], cv2.COLOR_BGR2HSV))
     mask = ((h >= GOLD_H[0]) & (h <= GOLD_H[1])
             & (s > TITLE_GOLD_S_MIN) & (v > TITLE_GOLD_V_MIN))

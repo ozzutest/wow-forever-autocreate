@@ -10,7 +10,7 @@ import yaml
 
 from states import policy
 from states.context import Context, pair_key
-from states.handlers import Machine, Outcome
+from states.handlers import STUCK_AFTER, Machine, Outcome
 from vision.classify import classify, State
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -118,6 +118,8 @@ def machine(chars, target="PvP", next_frame=None, tmp_path=Path("/tmp/shots")):
 
 def run(m, name):
     frame = cv2.imread(str(FIX / name))
+    assert frame is not None, f"missing fixture {name}"
+    assert frame.shape[:2] == (1080, 1920), f"{name} must be a full 1920x1080 frame, not a crop"
     obs = classify(frame, TITLES)
     return obs, m.handle(obs, frame)
 
@@ -283,3 +285,77 @@ def test_rehearsal_handles_fatal_as_throttle():
     assert out is Outcome.CONTINUE and len(bot.inp.clicks) == 1
     assert ctx.throttle_count == 1 and ctx.last_error == "throttled"
     assert not ctx.finish_clicked and not ctx.fresh_customize   # retry with a fresh name check
+
+
+# ------------------------------------------------------------ stuck watchdog
+
+def test_repeated_clicks_without_progress_escalate(tmp_path):
+    m, ctx, bot = machine([char(("Marek", "Darek"))], target="Normal", tmp_path=tmp_path)
+    ctx.unreadable_ruleset = 99
+    for _ in range(STUCK_AFTER + 1):
+        ctx.cooldown_until = 0.0                 # pretend the cooldown passed
+        ctx.unreadable_ruleset = 99
+        run(m, NO_TITLE)                         # RULESET clicked, screen never changes
+    assert len(bot.inp.clicks) == STUCK_AFTER    # the extra click was replaced by escalation
+    assert ctx.escalate
+    assert list(tmp_path.glob("*_stuck_char_select.png"))
+
+
+def test_screen_change_resets_the_watchdog(tmp_path):
+    m, ctx, bot = machine([char(("Marek", "Darek"))], target="Normal", tmp_path=tmp_path)
+    for i in range(10):
+        ctx.cooldown_until, ctx.unreadable_ruleset = 0.0, 99
+        run(m, NO_TITLE if i % 2 == 0 else "reconnect_01.png")   # alternating screens = progress
+    assert not ctx.escalate
+
+
+def test_stuck_dialog_gets_enter(tmp_path):
+    m, ctx, bot = machine([char(("A", "B"))], tmp_path=tmp_path)
+    ctx.rehearse_fatal_as = "faction_imbalance"
+    for _ in range(STUCK_AFTER + 1):
+        ctx.cooldown_until = 0.0
+        run(m, FATAL)                            # the dialog never goes away
+    assert bot.inp.keys == [("Return",)] and not ctx.escalate
+
+
+# ------------------------------------------------- disconnect (cable unplugged)
+
+def test_two_button_dialog_clicks_okay_not_help():
+    m, ctx, bot = machine([char(("A", "B"))])
+    obs, _ = run(m, "error_dialog_disconnected_help_01.png")
+    assert obs.dialog.known == "disconnected" and obs.dialog.error_code == "WOW51900328"
+    (x, y), = bot.inp.clicks
+    assert abs(x - 1087) < 25, "clicked Help instead of Okay"
+
+
+def test_okay_fallback_picks_rightmost_button():
+    from vision import ocr
+    frame = cv2.imread(str(FIX / "error_dialog_disconnected_help_01.png"))
+    ocr_okay, ocr.OKAY_LABEL = ocr.OKAY_LABEL, "label-never-read"   # force the fallback
+    try:
+        d = ocr.read_dialog(frame)
+    finally:
+        ocr.OKAY_LABEL = ocr_okay
+    assert d.okay is not None and abs(d.okay[0] - 1087) < 25, f"fallback picked {d.okay}"
+    assert abs(d.okay[1] - 575) < 12, "picked a button outside the dialog (Log Out?)"
+
+
+def test_highlighted_reconnect_button_still_recognized_and_clicked():
+    m, ctx, bot = machine([char(("A", "B"))])
+    obs, _ = run(m, "reconnect_after_disconnect_01.png")   # white "Reconnect" label
+    assert obs.state is State.RECONNECT
+    assert bot.inp.clicks == [tuple(LAYOUT["reconnect"]["reconnect"])]
+
+
+def test_reconnect_waits_while_button_inactive():
+    import numpy as np
+    m, ctx, bot = machine([char(("A", "B"))])
+    m.on_reconnect(None, np.zeros((1080, 1920, 3), np.uint8))
+    assert bot.inp.clicks == []
+
+
+def test_blz_error_code_is_parsed():
+    import re
+    from vision.ocr import ERROR_CODE_RE, ERROR_CODES
+    code = re.search(ERROR_CODE_RE, "you have been disconnected blz51901016").group(0).upper()
+    assert ERROR_CODES[code] == "disconnected"

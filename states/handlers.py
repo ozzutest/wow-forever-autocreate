@@ -30,6 +30,7 @@ NAME_TIMEOUT = 15.0       # no green/red this long after typing: type again
 FINISH_INACTIVE_MAX = 5.0 # green name but grey Finish this long: Back and do a full round
 UNKNOWN_SHOT_EVERY = 30.0
 RULESET_UNREADABLE_MAX = 3  # frames without a ruleset title above the list before RULESET
+STUCK_AFTER = 4           # screen-changing clicks that left us on the same screen -> escalate
 
 CHAR_LIST_BOX = (1555, 150, 1865, 920)  # names in the char select list
 
@@ -54,17 +55,42 @@ class Machine:
         self._last_unknown_shot = 0.0
         self._last_wait_log = 0.0
         self._last_queue_pos: int | None = None
+        self._nav_state: State | None = None  # screen the last navigation clicks happened on
+        self._nav_count = 0
+        self._frame = None
 
     # ------------------------------------------------------------- plumbing
 
     def handle(self, obs: Observation, frame) -> Outcome:
         c = self.ctx
+        if obs.state is not self._nav_state:
+            self._nav_state, self._nav_count = obs.state, 0   # the screen changed: progress
         if obs.state.value == c.cooldown_state and time.time() < c.cooldown_until:
             return Outcome.CONTINUE
+        self._frame = frame
         return getattr(self, f"on_{obs.state.value}")(obs, frame)
 
     def cooldown(self, state: State, seconds: float = COOLDOWN) -> None:
         self.ctx.cooldown_state, self.ctx.cooldown_until = state.value, time.time() + seconds
+
+    def navigate(self, point, state: State, seconds: float = COOLDOWN) -> None:
+        """A click that should change the screen. If several in a row don't, we're stuck:
+        input not reaching WoW, a covered button, a screen that looks the same but isn't.
+        Repeating the same click forever won't fix that, so start over from Reconnect."""
+        self._nav_count += 1
+        if self._nav_count > STUCK_AFTER:
+            shot = self.save(self._frame, f"stuck_{state.value}") if self._frame is not None else None
+            log.warning("STUCK on %s: %d clicks changed nothing (screenshot: %s); starting over "
+                        "from Reconnect", state.value, STUCK_AFTER, shot.name if shot else "-")
+            self._nav_count = 0
+            if state is State.ERROR:
+                self.bot.inp.key("Return")      # a dialog that ignores clicks may take Enter
+            else:
+                self.ctx.escalate = True
+            self.cooldown(state, seconds)
+            return
+        self.click(point)
+        self.cooldown(state, seconds)
 
     def click(self, point) -> None:
         self.bot.inp.click(int(point[0]), int(point[1]))
@@ -87,8 +113,7 @@ class Machine:
         point = next((w.center for l in read_lines(frame, BOTTOM_BAND) for w in l.words
                       if normalize(w.text) == "back"), tuple(self.L["char_select"]["back"]))
         log.info("Back (%s)", why)
-        self.click(point)
-        self.cooldown(state)
+        self.navigate(point, state)
         return Outcome.CONTINUE
 
     def char_and_looks(self, index: int):
@@ -125,10 +150,13 @@ class Machine:
         if now < c.next_reconnect_at:
             self.wait_log("Reconnect in %.0f s", c.next_reconnect_at - now)
             return Outcome.CONTINUE
+        point = tuple(self.L["reconnect"]["reconnect"])
+        if not button_active(frame, point):
+            self.wait_log("Reconnect button not active yet")
+            return Outcome.CONTINUE
         c.lost_client_state()
         log.info("clicking Reconnect")
-        self.click(self.L["reconnect"]["reconnect"])
-        self.cooldown(State.RECONNECT, 10.0)
+        self.navigate(point, State.RECONNECT, 10.0)
         return Outcome.CONTINUE
 
     def on_login_form(self, obs, frame) -> Outcome:
@@ -140,7 +168,7 @@ class Machine:
 
     def _okay(self, obs) -> None:
         if obs.dialog and obs.dialog.okay:
-            self.click(obs.dialog.okay)
+            self.navigate(obs.dialog.okay, State.ERROR, 3.0)
         else:
             log.warning("no Okay position found, pressing Enter")
             self.bot.inp.key("Return")
@@ -157,7 +185,7 @@ class Machine:
             log.info("  throttle count %d/%d%s", self.ctx.throttle_count, policy.THROTTLE_ESCALATE_AT,
                      " -> escalating" if self.ctx.escalate else "")
         self._okay(obs)
-        self.cooldown(State.ERROR, 3.0)
+        self.cooldown(State.ERROR, 3.0)  # also after Enter, when no Okay was found
         return Outcome.CONTINUE
 
     def on_fatal(self, obs, frame) -> Outcome:
@@ -198,8 +226,7 @@ class Machine:
                 log.info("ruleset %r still unavailable: Cancel to refresh (%d/%d)", self.target,
                          c.ruleset_refreshes, policy.RULESET_RECONNECT_AFTER)
             c.ruleset_confirmed = False
-            self.click(rs["cancel"])
-            self.cooldown(State.RULESET_SELECT)
+            self.navigate(rs["cancel"], State.RULESET_SELECT)
             return Outcome.CONTINUE
         c.ruleset_wait_since, c.ruleset_refreshes = None, 0
         log.info("ruleset -> %s", self.target)
@@ -209,9 +236,8 @@ class Machine:
         except SliceError as e:
             log.warning("%s", e)
             return Outcome.CONTINUE
-        self.click(rs["select"])
         c.ruleset_confirmed = True
-        self.cooldown(State.RULESET_SELECT)
+        self.navigate(rs["select"], State.RULESET_SELECT)
         return Outcome.CONTINUE
 
     # ------------------------------------------------------------ char select
@@ -235,8 +261,7 @@ class Machine:
                     return Outcome.CONTINUE
                 c.unreadable_ruleset = 0
                 log.info("no ruleset title above the list: RULESET to check")
-                self.click(self.L["char_select"]["ruleset_button"])
-                self.cooldown(State.CHAR_SELECT)
+                self.navigate(self.L["char_select"]["ruleset_button"], State.CHAR_SELECT)
                 return Outcome.CONTINUE
             self.wait_log("no ruleset title above the list, but we just selected %r", self.target)
         else:
@@ -244,8 +269,7 @@ class Machine:
             if obs.ruleset.title != self.target:
                 c.ruleset_confirmed = False
                 log.info("char select shows %r, want %r: RULESET", obs.ruleset.title, self.target)
-                self.click(self.L["char_select"]["ruleset_button"])
-                self.cooldown(State.CHAR_SELECT)
+                self.navigate(self.L["char_select"]["ruleset_button"], State.CHAR_SELECT)
                 return Outcome.CONTINUE
 
         listed = self.listed_names(frame)
@@ -269,8 +293,7 @@ class Machine:
             c.start_character(nxt)
             log.info("next character: %s", self.label(nxt))
         log.info("Create Character")
-        self.click(self.L["char_select"]["create_character"])
-        self.cooldown(State.CHAR_SELECT)
+        self.navigate(self.L["char_select"]["create_character"], State.CHAR_SELECT)
         return Outcome.CONTINUE
 
     # ------------------------------------------------------------ char create
@@ -388,9 +411,8 @@ class Machine:
             return Outcome.DONE
         c.finish_attempts += 1
         log.info("Finish (attempt %d)", c.finish_attempts)
-        self.click(finish)
         c.finish_clicked, c.fresh_customize = True, False
-        self.cooldown(State.CHAR_CUSTOMIZE)
+        self.navigate(finish, State.CHAR_CUSTOMIZE)
         return Outcome.CONTINUE
 
     # -------------------------------------------------------------- unknown
