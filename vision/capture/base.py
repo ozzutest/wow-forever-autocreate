@@ -27,7 +27,7 @@ def make_capture(window_name: str) -> WindowCapture:
         from .x11 import X11Capture
         return X11Capture(window_name)
     if sys.platform == "win32":
-        from .windows import WindowsCapture
+        from .win32 import WindowsCapture
         return WindowsCapture(window_name)
     raise RuntimeError(f"unsupported platform: {sys.platform}")
 
