@@ -1,0 +1,646 @@
+ruleset: pvp
+has_pack: true 
+
+characters:
+- appearance:
+    eye_color: 15
+    face: 9
+    facial_hair: 11
+    grime: 3
+    hair_color: 8
+    hair_style: 13
+    skin_color: 9
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: orc
+- appearance:
+    eye_color: 15
+    face: 9
+    hair_color: 8
+    hair_style: 15
+    piercings: 7
+    skin_color: 9
+  class: warrior
+  gender: female
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: orc
+- appearance:
+    face: 9
+    facial_hair: 11
+    hair_color: 8
+    hair_style: 13
+    skin_color: 9
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: orc
+- appearance:
+    face: 9
+    hair_color: 8
+    hair_style: 15
+    piercings: 7
+    skin_color: 9
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: orc
+- appearance:
+    eye_glow: 2
+    face: 10
+    face_features: 4
+    hair_color: 10
+    hair_style: 16
+    jaw_features: 10
+    skin_color: 6
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: undead
+- appearance:
+    eye_glow: 2
+    face: 10
+    face_features: 4
+    hair_color: 10
+    hair_style: 15
+    jaw_features: 5
+    skin_color: 6
+  class: priest
+  gender: female
+  hd_model: true
+  names:
+  - main: Customized
+    secondary: Name
+  - main: Test 
+    secondary: Test 
+  - main: Another
+    secondary: Case
+  race: undead
+- appearance:
+    eye_glow: 2
+    face: 10
+    face_features: 4
+    hair_color: 10
+    hair_style: 16
+    jaw_features: 10
+    skin_color: 6
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: undead
+- appearance:
+    eye_glow: 2
+    face: 10
+    face_features: 4
+    hair_color: 10
+    hair_style: 15
+    jaw_features: 5
+    skin_color: 6
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: undead
+- appearance:
+    eye_color: 7
+    face: 5
+    facial_hair: 5
+    foremane: 4
+    hair: 4
+    horn_color: 3
+    horn_style: 13
+    nose_ring: 4
+    skin_color: 19
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: tauren
+- appearance:
+    eye_color: 7
+    face: 4
+    foremane: 3
+    hair: 5
+    horn_color: 3
+    horn_style: 15
+    skin_color: 11
+  class: warrior
+  gender: female
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: tauren
+- appearance:
+    face: 5
+    facial_hair: 5
+    hair: 4
+    horn_color: 3
+    horn_style: 13
+    nose_ring: 4
+    skin_color: 19
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: tauren
+- appearance:
+    face: 4
+    hair: 5
+    horn_color: 3
+    horn_style: 15
+    skin_color: 11
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: tauren
+- appearance:
+    eye_color: 10
+    face: 5
+    face_paint: 7
+    face_paint_color: 10
+    hair_color: 10
+    hair_style: 13
+    skin_color: 6
+    tusks: 5
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: troll
+- appearance:
+    eye_color: 10
+    face: 6
+    hair_color: 10
+    hair_style: 12
+    skin_color: 6
+    tusks: 6
+  class: warrior
+  gender: female
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: troll
+- appearance:
+    face: 5
+    face_paint: 7
+    face_paint_color: 10
+    hair_color: 10
+    hair_style: 13
+    skin_color: 6
+    tusks: 5
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: troll
+- appearance:
+    face: 6
+    hair_color: 10
+    hair_style: 12
+    skin_color: 6
+    tusks: 6
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: troll
+- appearance:
+    body_tattoo: 3
+    body_tattoo_color: 2
+    ears: 3
+    eye_color: 9
+    eyebrow_style: 4
+    eyesight: 4
+    face: 10
+    face_tattoo: 4
+    facial_hair: 13
+    feather_color: 8
+    feathers: 2
+    hair_color: 10
+    hair_style: 21
+    skin_color: 9
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: skyborne_elf_horde
+- appearance:
+    body_tattoo: 3
+    body_tattoo_color: 2
+    earrings: 6
+    ears: 3
+    eye_color: 9
+    eyebrow_style: 4
+    eyesight: 4
+    face: 10
+    face_tattoo: 4
+    face_tattoo_color: 2
+    feathers: 2
+    hair_color: 10
+    hair_style: 25
+    jewelry_color: 2
+    skin_color: 9
+  class: warrior
+  gender: female
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: skyborne_elf_horde
+- appearance:
+    ears: 3
+    eye_color: 9
+    eyebrow_style: 4
+    eyesight: 4
+    face: 10
+    face_tattoo: 4
+    facial_hair: 13
+    feather_color: 8
+    feathers: 2
+    hair_color: 10
+    hair_style: 21
+    skin_color: 9
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: skyborne_elf_horde
+- appearance:
+    body_tattoo: 3
+    body_tattoo_color: 2
+    earrings: 6
+    ears: 3
+    eye_color: 9
+    eyebrow_style: 4
+    eyesight: 4
+    face: 10
+    face_tattoo: 4
+    face_tattoo_color: 2
+    feathers: 2
+    hair_color: 10
+    hair_style: 25
+    jewelry_color: 2
+    skin_color: 9
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: skyborne_elf_horde
+- appearance:
+    eye_color: 19
+    eyebrow_style: 12
+    face: 12
+    face_shape: 3
+    facial_hair: 9
+    hair_color: 10
+    hair_style: 17
+    skin_color: 13
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: human
+- appearance:
+    eye_color: 19
+    eyebrow_style: 26
+    face: 15
+    face_shape: 3
+    hair_color: 10
+    hair_style: 24
+    makeup: 7
+    piercings: 7
+    skin_color: 13
+  class: warrior
+  gender: female
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: human
+- appearance:
+    face: 12
+    facial_hair: 9
+    hair_color: 10
+    hair_style: 17
+    skin_color: 13
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: human
+- appearance:
+    face: 15
+    hair_color: 10
+    hair_style: 24
+    piercings: 7
+    skin_color: 13
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: human
+- appearance:
+    beard: 11
+    eye_color: 19
+    face: 10
+    hair_color: 10
+    hair_style: 19
+    mustache: 10
+    skin_color: 11
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: dwarf
+- appearance:
+    eye_color: 19
+    face: 10
+    hair_color: 10
+    hair_style: 21
+    piercings: 6
+    skin_color: 11
+  class: warrior
+  gender: female
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: dwarf
+- appearance:
+    beard: 11
+    face: 10
+    hair_color: 10
+    hair_style: 19
+    mustache: 10
+    skin_color: 11
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: dwarf
+- appearance:
+    face: 10
+    hair_color: 10
+    hair_style: 21
+    piercings: 6
+    skin_color: 11
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: dwarf
+- appearance:
+    eyebrow_style: 9
+    face: 9
+    facial_hair: 6
+    hair_color: 8
+    hair_style: 12
+    skin_color: 9
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: night_elf
+- appearance:
+    eyebrow_style: 4
+    face: 9
+    hair_color: 8
+    hair_style: 15
+    markings: 10
+    markings_color: 6
+    skin_color: 9
+  class: warrior
+  gender: female
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: night_elf
+- appearance:
+    face: 9
+    facial_hair: 6
+    hair_color: 8
+    hair_style: 12
+    skin_color: 9
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: night_elf
+- appearance:
+    face: 9
+    hair_color: 8
+    hair_style: 15
+    markings: 10
+    markings_color: 6
+    skin_color: 9
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: night_elf
+- appearance:
+    eye_color: 13
+    eyebrow_style: 9
+    face: 7
+    facial_hair: 8
+    hair_color: 9
+    hair_style: 15
+    skin_color: 7
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: gnome
+- appearance:
+    earring_color: 15
+    earrings: 7
+    eye_color: 13
+    face: 7
+    hair_color: 9
+    hair_style: 15
+    skin_color: 7
+  class: warrior
+  gender: female
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: gnome
+- appearance:
+    face: 7
+    facial_hair: 8
+    hair_color: 9
+    hair_style: 15
+    skin_color: 7
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: gnome
+- appearance:
+    earrings: 7
+    face: 7
+    hair_color: 9
+    hair_style: 15
+    skin_color: 7
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: gnome
+- appearance:
+    body_tattoo: 3
+    ears: 3
+    eye_color: 9
+    eyebrow_style: 4
+    eyesight: 4
+    face: 10
+    face_tattoo: 4
+    face_tattoo_color: 2
+    facial_hair: 13
+    feathers: 2
+    hair_color: 10
+    hair_style: 21
+    skin_color: 9
+  class: warrior
+  gender: male
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: skyborne_elf_alliance
+- appearance:
+    body_tattoo: 3
+    body_tattoo_color: 2
+    earrings: 6
+    ears: 3
+    eye_color: 9
+    eyebrow_style: 4
+    eyesight: 4
+    face: 10
+    face_tattoo: 4
+    face_tattoo_color: 2
+    feather_color: 8
+    feathers: 2
+    hair_color: 10
+    hair_style: 25
+    jewelry_color: 2
+    skin_color: 9
+  class: warrior
+  gender: female
+  hd_model: true
+  names:
+  - main: Probex
+    secondary: Testa
+  race: skyborne_elf_alliance
+- appearance:
+    body_tattoo: 3
+    ears: 3
+    eye_color: 9
+    eyebrow_style: 4
+    eyesight: 4
+    face: 10
+    face_tattoo: 4
+    facial_hair: 13
+    feather_color: 8
+    feathers: 2
+    hair_color: 10
+    hair_style: 21
+    skin_color: 9
+  class: warrior
+  gender: male
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: skyborne_elf_alliance
+- appearance:
+    body_tattoo: 3
+    body_tattoo_color: 2
+    earrings: 6
+    ears: 3
+    eye_color: 9
+    eyebrow_style: 4
+    eyesight: 4
+    face: 10
+    face_tattoo: 4
+    face_tattoo_color: 2
+    feather_color: 8
+    feathers: 2
+    hair_color: 10
+    hair_style: 25
+    jewelry_color: 2
+    skin_color: 9
+  class: warrior
+  gender: female
+  hd_model: false
+  names:
+  - main: Probex
+    secondary: Testa
+  race: skyborne_elf_alliance

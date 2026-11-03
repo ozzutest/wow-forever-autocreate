@@ -1,0 +1,17 @@
+# Dry-run test config: run with
+#   python -m runner --config characters.test.yaml
+# Compare the keys with characters.example.yaml; that file is the reference for the schema.
+ruleset: normal          # normal | pvp | roleplay | roleplay_pvp
+has_pack: true
+
+characters:
+  - race: orc
+    gender: male
+    class: warrior
+    hd_model: true
+    appearance: random
+    names:               # tried in this order; a red X skips to the next
+      - { main: Marek, secondary: Darek }
+      - { main: Og, secondary: herbata }
+      - { main: Og, secondary: Ziomek }
+      - { main: Ziombel, secondary: Og }

@@ -1,0 +1,21 @@
+ruleset: roleplay_pvp 
+has_pack: false
+
+characters:
+  - race: undead
+    gender: female
+    class: priest 
+    hd_model: true
+    appearance: 
+      skin_color: 5
+      face: 10
+      hair_style: 4
+      hair_color: 9
+    names:
+      - { main: Customized, secondary: Name }
+      - { main: Test, secondary: Test } 
+      - { main: WW, secondary: LL }
+      - { main: Marek, secondary: Darek }
+      - { main: Og, secondary: herbata }
+      - { main: Og, secondary: Ziomek }
+      - { main: Ziombel, secondary: Og }

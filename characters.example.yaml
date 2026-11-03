@@ -1,0 +1,21 @@
+ruleset: pvp 
+has_pack: false          # true if your account can create Skyborne Elves
+
+characters:
+  - race: orc
+    gender: female
+    class: warrior
+    hd_model: true
+    names:
+      - { main: Og, secondary: Herbata }
+      - { main: Og, secondary: Ziomek }
+    appearance:          # 1-based option index; unlisted fields keep the default
+      skin_color: 3
+      hair_style: 7
+      piercings: 2
+  - race: orc
+    gender: male
+    class: shaman
+    names:
+      - { main: Marek, secondary: Darek }
+    appearance: random   # clicks the dice button for random look

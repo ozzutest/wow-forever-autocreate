@@ -1,0 +1,479 @@
+name_rules:
+  main:      { min_len: 2, max_len: 12, max_repeat: 2 }
+  secondary: { min_len: 2, max_len: 12, max_repeat: 2 }
+
+rulesets:
+  normal: Normal
+  pvp: PvP
+  roleplay: Roleplay
+  roleplay_pvp: Roleplay PvP
+
+races:
+  orc:
+    faction: horde
+    requires_pack: false
+    classes: [warrior, hunter, mage, rogue, warlock, shaman]
+    appearance:
+      hd:
+        male:
+          tabs:
+            - skin_color: 9
+              face: 9
+              hair_style: 13
+              hair_color: 8
+              eye_color: 15
+            - facial_hair: 11
+              grime: 3
+        female:
+          tabs:
+            - skin_color: 9
+              face: 9
+              hair_style: 15
+              hair_color: 8
+              eye_color: 15
+            - piercings: 7
+      sd:
+        male:
+          tabs:
+            - skin_color: 9
+              face: 9
+              hair_style: 13
+              hair_color: 8
+              facial_hair: 11
+        female:
+          tabs:
+            - skin_color: 9
+              face: 9
+              hair_style: 15
+              hair_color: 8
+              piercings: 7
+  undead:
+    faction: horde
+    requires_pack: false
+    classes: [warrior, mage, rogue, priest, warlock, paladin]
+    appearance:
+      hd:
+        male:
+          tabs:
+            - skin_color: 6
+              face: 10
+              hair_style: 16
+              hair_color: 10
+              face_features: 4
+              jaw_features: 10
+              eye_glow: 2
+        female:
+          tabs:
+            - skin_color: 6
+              face: 10
+              hair_style: 15
+              hair_color: 10
+              face_features: 4
+              jaw_features: 5
+              eye_glow: 2
+      sd:
+        male:
+          tabs:
+            - skin_color: 6
+              face: 10
+              hair_style: 16
+              hair_color: 10
+              face_features: 4
+              jaw_features: 10
+              eye_glow: 2
+        female:
+          tabs:
+            - skin_color: 6
+              face: 10
+              hair_style: 15
+              hair_color: 10
+              face_features: 4
+              jaw_features: 5
+              eye_glow: 2
+  tauren: 
+    faction: horde
+    requires_pack: false
+    classes: [warrior, hunter, druid, shaman]
+    appearance:
+      hd:
+        male: 
+          tabs:
+            - skin_color: 19
+              face: 5
+              hair: 4
+              eye_color: 7
+            - horn_style: 13
+              horn_color: 3
+              facial_hair: 5
+              nose_ring: 4
+              foremane: 4
+        female:
+          tabs:
+            - skin_color: 11
+              face: 4
+              hair: 5
+              eye_color: 7
+            - horn_style: 15
+              horn_color: 3
+              foremane: 3
+      sd:
+        male:
+          tabs:
+            - skin_color: 19
+              face: 5
+              horn_style: 13
+              horn_color: 3
+              facial_hair: 5
+              nose_ring: 4
+              hair: 4
+        female:
+          tabs: 
+            - skin_color: 11
+              face: 4
+              horn_style: 15
+              horn_color: 3
+              hair: 5
+  troll:
+    faction: horde
+    requires_pack: false
+    classes: [warrior, hunter, mage, rogue, priest, warlock, shaman]
+    appearance:
+      hd:
+        male:
+          tabs:
+            - skin_color: 6
+              face: 5
+              hair_style: 13
+              hair_color: 10
+              eye_color: 10
+            - tusks: 5
+              face_paint: 7
+              face_paint_color: 10
+        female:
+          tabs:
+            - skin_color: 6
+              face: 6
+              hair_style: 12
+              hair_color: 10
+              eye_color: 10
+            - tusks: 6 
+      sd:
+        male: 
+          tabs:
+            - skin_color: 6
+              face: 5
+              hair_style: 13
+              hair_color: 10
+              tusks: 5
+              face_paint: 7
+              face_paint_color: 10
+        female:
+          tabs:
+            - skin_color: 6
+              face: 6
+              hair_style: 12
+              hair_color: 10
+              tusks: 6 
+  skyborne_elf_horde:
+    faction: horde
+    requires_pack: true
+    classes: [warrior, hunter, rogue, druid, shaman]
+    appearance:
+      hd:
+        male: 
+          tabs:
+            - skin_color: 9
+              face: 10
+              hair_style: 21
+              hair_color: 10
+              ears: 3
+              eye_color: 9
+              eyebrow_style: 4
+            - facial_hair: 13
+              eyesight: 4
+              feathers: 2
+              feather_color: 8
+              face_tattoo: 4
+            - body_tattoo: 3
+              body_tattoo_color: 2
+        female:
+          tabs:
+            - skin_color: 9
+              face: 10
+              hair_style: 25
+              hair_color: 10
+              ears: 3
+              eye_color: 9
+              eyebrow_style: 4
+            - earrings: 6
+              jewelry_color: 2
+              eyesight: 4
+              feathers: 2
+              face_tattoo: 4
+              face_tattoo_color: 2
+            - body_tattoo: 3
+              body_tattoo_color: 2
+      sd:
+        male:
+          tabs:
+            - skin_color: 9
+              face: 10
+              hair_style: 21
+              hair_color: 10
+              ears: 3
+              eye_color: 9
+              eyebrow_style: 4
+            - facial_hair: 13
+              eyesight: 4
+              feathers: 2
+              feather_color: 8
+              face_tattoo: 4
+        female:
+          tabs:
+            - skin_color: 9
+              face: 10
+              hair_style: 25
+              hair_color: 10
+              ears: 3
+              eye_color: 9
+              eyebrow_style: 4
+            - earrings: 6
+              jewelry_color: 2
+              eyesight: 4
+              feathers: 2
+              face_tattoo: 4
+              face_tattoo_color: 2
+            - body_tattoo: 3
+              body_tattoo_color: 2
+  human:
+    faction: alliance
+    requires_pack: false
+    classes: [warrior, hunter, mage, rogue, priest, warlock, paladin]
+    appearance:
+      hd:
+        male:
+          tabs:
+            - skin_color: 13
+              face: 12
+              hair_style: 17
+              hair_color: 10
+              eye_color: 19
+              eyebrow_style: 12
+              face_shape: 3
+            - facial_hair: 9
+        female:
+          tabs:
+            - skin_color: 13
+              face: 15
+              hair_style: 24
+              hair_color: 10
+              eye_color: 19
+              eyebrow_style: 26
+              face_shape: 3
+            - piercings: 7
+              makeup: 7
+      sd:
+        male:
+          tabs:
+            - skin_color: 13
+              face: 12
+              hair_style: 17
+              hair_color: 10
+              facial_hair: 9
+        female:
+          tabs:
+            - skin_color: 13
+              face: 15
+              hair_style: 24
+              hair_color: 10
+              piercings: 7
+  dwarf:
+    faction: alliance
+    requires_pack: false
+    classes: [warrior, hunter, rogue, priest, paladin, shaman]
+    appearance:
+      hd:
+        male:
+          tabs:
+            - skin_color: 11
+              face: 10
+              hair_style: 19
+              hair_color: 10
+              eye_color: 19
+            - beard: 11
+              mustache: 10
+        female:
+          tabs:
+            - skin_color: 11
+              face: 10
+              hair_style: 21
+              hair_color: 10
+              eye_color: 19
+            - piercings: 6
+      sd:
+        male:
+          tabs:
+            - skin_color: 11
+              face: 10
+              hair_style: 19
+              hair_color: 10
+              beard: 11
+              mustache: 10
+        female:
+          tabs:
+            - skin_color: 11
+              face: 10
+              hair_style: 21
+              hair_color: 10
+              piercings: 6
+  night_elf:
+    faction: alliance
+    requires_pack: false
+    classes: [warrior, hunter, rogue, priest, druid]
+    appearance:
+      hd:
+        male:
+          tabs:
+            - skin_color: 9
+              face: 9
+              hair_style: 12
+              hair_color: 8
+              eyebrow_style: 9
+            - facial_hair: 6
+        female:
+          tabs:
+            - skin_color: 9
+              face: 9
+              hair_style: 15
+              hair_color: 8
+              eyebrow_style: 4
+            - markings: 10
+              markings_color: 6
+      sd:
+        male:
+          tabs:
+            - skin_color: 9
+              face: 9
+              hair_style: 12
+              hair_color: 8
+              facial_hair: 6
+        female:
+          tabs:
+            - skin_color: 9
+              face: 9
+              hair_style: 15
+              hair_color: 8
+              markings: 10
+              markings_color: 6
+  gnome:
+    faction: alliance
+    requires_pack: false
+    classes: [warrior, mage, rogue, priest, warlock]
+    appearance:
+      hd:
+        male:
+          tabs:
+            - skin_color: 7
+              face: 7
+              hair_style: 15
+              hair_color: 9
+              eyebrow_style: 9
+              eye_color: 13
+            - facial_hair: 8
+        female:
+          tabs:
+            - skin_color: 7
+              face: 7
+              hair_style: 15
+              hair_color: 9
+              eye_color: 13
+            - earrings: 7
+              earring_color: 15
+      sd:
+        male:
+          tabs:
+            - skin_color: 7
+              face: 7
+              hair_style: 15
+              hair_color: 9
+              facial_hair: 8
+        female:
+          tabs:
+            - skin_color: 7
+              face: 7
+              hair_style: 15
+              hair_color: 9
+              earrings: 7
+  skyborne_elf_alliance:
+    faction: alliance
+    requires_pack: true
+    classes: [warrior, hunter, mage, rogue, druid]
+    appearance:
+      hd:
+        male: 
+          tabs:
+            - skin_color: 9
+              face: 10
+              hair_style: 21
+              hair_color: 10
+              ears: 3
+              eye_color: 9
+              eyebrow_style: 4
+            - facial_hair: 13
+              eyesight: 4
+              feathers: 2
+              face_tattoo: 4
+              face_tattoo_color: 2
+            - body_tattoo: 3
+        female:
+          tabs:
+            - skin_color: 9
+              face: 10
+              hair_style: 25
+              hair_color: 10
+              ears: 3
+              eye_color: 9
+              eyebrow_style: 4
+            - earrings: 6
+              jewelry_color: 2
+              eyesight: 4
+              feathers: 2
+              feather_color: 8
+              face_tattoo: 4
+              face_tattoo_color: 2
+            - body_tattoo: 3
+              body_tattoo_color: 2
+      sd:
+        male:
+          tabs:
+            - skin_color: 9
+              face: 10
+              hair_style: 21
+              hair_color: 10
+              ears: 3
+              eye_color: 9
+              eyebrow_style: 4
+            - facial_hair: 13
+              eyesight: 4
+              feathers: 2
+              feather_color: 8
+              face_tattoo: 4
+            - body_tattoo: 3
+        female:
+          tabs:
+            - skin_color: 9
+              face: 10
+              hair_style: 25
+              hair_color: 10
+              ears: 3
+              eye_color: 9
+              eyebrow_style: 4
+            - earrings: 6
+              jewelry_color: 2
+              eyesight: 4
+              feathers: 2
+              feather_color: 8
+              face_tattoo: 4
+              face_tattoo_color: 2
+            - body_tattoo: 3
+              body_tattoo_color: 2

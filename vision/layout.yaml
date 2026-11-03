@@ -1,0 +1,57 @@
+# Window coordinates at 1920x1080 (fullscreen). Verified against fixtures.
+window_size: [1920, 1080]
+
+char_create:
+  race:
+    orc: [275, 157]
+    undead: [275, 254]
+    tauren: [275, 351]
+    troll: [275, 448]
+    skyborne_elf_horde: [275, 545]
+    human: [87, 157]
+    dwarf: [87, 254]
+    night_elf: [87, 351]
+    gnome: [87, 448]
+    skyborne_elf_alliance: [87, 545]
+  gender:
+    male: [921, 47]
+    female: [999, 47]
+  class_y: 998
+  class_x:
+    warrior: 577
+    hunter: 673
+    mage: 769
+    rogue: 865
+    priest: 961
+    warlock: 1057
+    paladin: 1153
+    druid: 1249
+    shaman: 1345
+  hd_checkbox: [1658, 960]
+  customize: [1748, 1018]
+
+char_customize:
+  dice: [1596, 173]
+  tabs: [[1652, 210], [1740, 210], [1828, 210]]     
+  arrow_x: { left: 1615, right: 1865 }
+  value_x: [1660, 1820]                 # middle field of each row
+  first_row_y: { multi_tab: 335, single_tab: 260 }
+  row_step: 86
+  max_rows: 8
+  name_main: [789, 54]
+  name_secondary: [1131, 54]
+  name_indicator: [1324, 54]
+  finish: [1748, 1018]
+
+char_select:
+  create_character: [1659, 970]
+  back: [105, 1047]                   # also the fallback when OCR can't find "Back"
+  ruleset_button: [1091, 31]          # RULESET in the top bar
+
+ruleset_select:
+  select: [1786, 1037]
+  cancel: [130, 1037]
+  icon_offset_y: 65                   # card icon is this far below the OCR'd title
+
+reconnect:
+  reconnect: [958, 538]
