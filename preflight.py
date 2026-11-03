@@ -183,8 +183,12 @@ def check_capture(cap, titles) -> bool:
     return True
 
 
-def check_focus() -> None:
-    from input import active_window_name
+def check_focus() -> bool:
+    try:
+        from input import active_window_name
+    except ImportError as e:
+        report("FAIL", "Input backend", f"failed to load ({e}). Update the bot files")
+        return False
     print("\n  Now click into an empty spot of the WoW window (15 s)...")
     deadline = time.monotonic() + 15
     name = None
@@ -201,6 +205,7 @@ def check_focus() -> None:
         report("WARN", "Focus detection", f"focused window is {name!r}, not WoW (if WoW really was "
                "focused, run the bot with --no-focus-check)")
     time.sleep(0.5)
+    return True
 
 
 def check_mouse(cap) -> None:
@@ -263,9 +268,10 @@ def main() -> int:
     cap = check_window() if tools else None
     if cap is not None:
         try:
-            check_focus()  # first: on Windows the capture sees whatever is in front
-            check_capture(cap, conf[2] if conf else ["Normal", "PvP", "Roleplay", "Roleplay PvP"])
-            check_mouse(cap)
+            # Focus first: on Windows the capture sees whatever is in front.
+            if check_focus():
+                check_capture(cap, conf[2] if conf else ["Normal", "PvP", "Roleplay", "Roleplay PvP"])
+                check_mouse(cap)
         finally:
             cap.close()
 
