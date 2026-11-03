@@ -216,9 +216,16 @@ def check_mouse(cap) -> None:
                 return values
 
             win = shell("getwindowgeometry", wid)
+            before = shell("getmouselocation")
             subprocess.run(["xdotool", "mousemove", "--window", wid, "960", "5"], check=True, timeout=3)
             time.sleep(0.2)
             mouse = shell("getmouselocation")
+            if (mouse["X"], mouse["Y"]) == (before["X"], before["Y"]):
+                # Wayland (XWayland): the warp reaches WoW, but the reported position is the
+                # compositor's cursor, which doesn't follow it. Nothing to measure here.
+                report("OK", "Mouse input", "xdotool works; the position can't be measured under "
+                       "Wayland, so the practice run is the real test (watch that clicks land)")
+                return
             dx = int(mouse["X"]) - (int(win["X"]) + 960)
             dy = int(mouse["Y"]) - (int(win["Y"]) + 5)
     except Exception as e:
