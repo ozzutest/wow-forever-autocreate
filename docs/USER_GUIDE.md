@@ -1,6 +1,6 @@
 # User guide
 
-This guide walks you through setting up the bot and running it on launch night. You don't need to know Python: copy the commands into a terminal exactly as shown.
+This guide walks you through setting up the bot and running it on launch night. You don't need to know Python: copy the commands exactly as shown into Command Prompt (Windows) or a terminal (Linux). Both are called "the terminal" below.
 
 **What the bot does:** while you sleep, it waits in the login queue for you, then creates your characters with the race, class, look and name you chose. If the servers are full or a name is taken, it waits, tries again, or moves on to your next name.
 
@@ -30,7 +30,7 @@ This guide walks you through setting up the bot and running it on launch night. 
 
 > **Every time you open a new Command Prompt** for the bot, go to the folder and run `.venv\Scripts\activate` again. You'll see `(.venv)` at the start of the line when it's active.
 
-In the rest of this guide, commands are the same on Windows, except `cp` (Linux) is `copy` on Windows.
+In the rest of this guide, where Windows and Linux commands differ, both are shown.
 
 ### On Linux
 
@@ -56,6 +56,8 @@ pip install -r requirements.txt
 
 > **Every time you open a new terminal** for the bot, first go to the folder and run `source .venv/bin/activate` again. You'll see `(.venv)` at the start of the line when it's active.
 
+> **"Allow … to control your computer?"** On Pop!_OS (COSMIC) a prompt may ask this when the bot first sends a click. Click **Allow**: until you do, the bot's clicks don't reach the game.
+
 ## 2. Game settings (required)
 
 The bot clicks at exact spots on the screen, so these settings **must** match. Open the game menu, go to **System → Graphics** and set:
@@ -77,9 +79,11 @@ Nothing else in the graphics settings matters.
 
 Make your own copy of the example file:
 
-```bash
-cp characters.example.yaml characters.yaml
+```bat
+copy characters.example.yaml characters.yaml
 ```
+
+(on Linux: `cp characters.example.yaml characters.yaml`)
 
 Open `characters.yaml` in a text editor. It looks like this:
 
@@ -149,7 +153,16 @@ If you get that line, you're ready for launch night.
 1. Make sure you have a **free character slot**, and the game settings from step 2 are still set.
 2. Turn off the screen lock / sleep and notifications (Do Not Disturb; on Windows also set **Settings → System → Power → Screen and sleep** to Never). Close the Steam overlay.
 3. Start WoW from the launcher. It's fine to start the bot while WoW is still in the login queue.
-4. In the terminal:
+4. In the terminal, go to the bot's folder, then:
+
+   Windows:
+
+   ```bat
+   .venv\Scripts\activate
+   python -m runner --create
+   ```
+
+   Linux:
 
    ```bash
    source .venv/bin/activate
