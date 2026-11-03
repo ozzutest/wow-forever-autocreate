@@ -8,7 +8,7 @@ It works by **looking at the screen** (screen capture + OCR) and **clicking like
 
 > **English client only.** The bot recognizes screens and error messages by reading their English text. With the game in any other language it can't tell where it is and won't work.
 >
-> **One setup only, for now:** Linux (Pop!_OS, COSMIC) and the exact game settings below. Windows support is planned.
+> **Exact game settings required** (below). Runs on Linux (Pop!_OS, COSMIC; tested) and Windows 10/11 (new, being tested).
 
 Non-technical setup and launch-night steps are in **[docs/USER_GUIDE.md](docs/USER_GUIDE.md)**.
 
@@ -24,7 +24,7 @@ All click positions are measured on a 1920×1080 picture of the game, so these s
 | Use UI Scale | **off** (box unchecked) |
 | Game language (System → Languages and Social) | **English** |
 
-![Required graphics settings: Display Mode Fullscreen (Windowed), Resolution 1920x1080, Render Scale 100%, Use UI Scale off](screenshots/recommended-settings.png)
+![Required graphics settings: Display Mode Fullscreen (Windowed), Resolution 1920x1080, Render Scale 100%, Use UI Scale off](screenshots/recommended_settings.png)
 
 Other graphics options (quality, anti-aliasing, V-Sync…) don't matter.
 
@@ -88,12 +88,14 @@ states/
   policy.py            what each error means, and every retry/backoff value
   handlers.py          one handler per screen
 vision/
-  capture/             window capture (python-xlib on XWayland)
+  capture/             window capture: python-xlib on XWayland, mss on Windows (win32.py)
   classify.py          which screen is this? (OCR anchors, dialogs first)
   ocr.py               dialog/ruleset OCR; all thresholds and known messages at the top
   detect.py            color detectors: arrows, buttons, checkboxes, name indicator
   layout.yaml          click coordinates at 1920×1080
-input/xdotool.py       mouse/keyboard into the WoW window, focus detection
+input/                 mouse/keyboard into the WoW window, focus detection
+  xdotool.py           Linux (XWayland)
+  win32.py             Windows (SendInput)
 config/
   races.yaml           game data: races, classes, appearance options per tab
   models.py            config validation (pydantic)

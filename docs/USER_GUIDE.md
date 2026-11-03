@@ -4,11 +4,35 @@ This guide walks you through setting up the bot and running it on launch night. 
 
 **What the bot does:** while you sleep, it waits in the login queue for you, then creates your characters with the race, class, look and name you chose. If the servers are full or a name is taken, it waits, tries again, or moves on to your next name.
 
-**What it needs:** Linux (Pop!_OS), and WoW **in English** with the exact settings from step 2. The bot finds its way by reading the English text on the screen, so it **won't work with the game in any other language**.
+**What it needs:** Windows 10/11 or Linux (Pop!_OS), and WoW **in English** with the exact settings from step 2. The bot finds its way by reading the English text on the screen, so it **won't work with the game in any other language**.
 
 ---
 
 ## 1. One-time setup
+
+### On Windows
+
+1. **Python:** download it from [python.org](https://www.python.org/downloads/) (3.12 or newer). In the installer, tick **"Add python.exe to PATH"** before clicking Install.
+2. **Tesseract** (reads the text on the screen): download the Windows installer from the [UB Mannheim page](https://github.com/UB-Mannheim/tesseract/wiki) and install it to the **default folder**. The bot finds it there by itself.
+3. Open **Command Prompt** (press the Windows key, type `cmd`, Enter). Use Command Prompt, not PowerShell. Go to the bot's folder, for example:
+
+   ```bat
+   cd %USERPROFILE%\Downloads\wow-forever-autocreate
+   ```
+
+4. Create a private Python environment for the bot and install what it needs:
+
+   ```bat
+   python -m venv .venv
+   .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+> **Every time you open a new Command Prompt** for the bot, go to the folder and run `.venv\Scripts\activate` again. You'll see `(.venv)` at the start of the line when it's active.
+
+In the rest of this guide, commands are the same on Windows, except `cp` (Linux) is `copy` on Windows.
+
+### On Linux
 
 Open a terminal (search for "Terminal" in the apps). Go to the bot's folder, for example:
 
@@ -41,11 +65,13 @@ The bot clicks at exact spots on the screen, so these settings **must** match. O
 - **Render Scale:** 100% (the text next to the slider says `1920x1080 (100%)`)
 - **Use UI Scale:** off (the box is empty)
 
-![The four setings are necessary in order to run the script correctly](../screenshots/recommended-settings.png)
+![The four required settings, marked in red](../screenshots/recommended_settings.png)
 
 Then, under **System → Languages and Social**, make sure the game language is **English**.
 
-Nothing else in the graphics settings matters. If your monitor is bigger than 1920×1080, the game must still be set to 1920x1080.
+Nothing else in the graphics settings matters.
+
+**Monitor bigger than 1920×1080?** In "Fullscreen (Windowed)" the game takes the size of your desktop, whatever the Resolution setting says. For launch night, set the desktop itself to 1920×1080: on Windows, **Settings → System → Display → Display resolution**. Windows display scaling (100%, 125%…) doesn't matter.
 
 ## 3. Your characters
 
@@ -121,7 +147,7 @@ If you get that line, you're ready for launch night.
 ## 6. Launch night
 
 1. Make sure you have a **free character slot**, and the game settings from step 2 are still set.
-2. Turn off the screen lock / sleep and notifications (Do Not Disturb). Close the Steam overlay.
+2. Turn off the screen lock / sleep and notifications (Do Not Disturb; on Windows also set **Settings → System → Power → Screen and sleep** to Never). Close the Steam overlay.
 3. Start WoW from the launcher. It's fine to start the bot while WoW is still in the login queue.
 4. In the terminal:
 

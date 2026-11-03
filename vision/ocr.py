@@ -11,12 +11,23 @@ from __future__ import annotations
 
 import difflib
 import re
+import shutil
+import sys
+from pathlib import Path
 from dataclasses import dataclass, field
 from enum import Enum
 
 import cv2
 import numpy as np
 import pytesseract
+
+# Windows: the Tesseract installer doesn't add itself to PATH; use its default location.
+if sys.platform == "win32" and not shutil.which("tesseract"):
+    for _exe in (Path(r"C:\Program Files\Tesseract-OCR\tesseract.exe"),
+                 Path(r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe")):
+        if _exe.exists():
+            pytesseract.pytesseract.tesseract_cmd = str(_exe)
+            break
 
 # =================================================================== CONSTANTS
 

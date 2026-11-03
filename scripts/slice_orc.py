@@ -22,7 +22,7 @@ import yaml
 
 from config import load_characters, load_game
 from config.models import Character, GameData, GenderAppearance, ModelType
-from input.xdotool import XdotoolInput
+from input import Input
 from vision.capture import make_capture
 from vision.detect import (
     ArrowState, NameStatus, arrow_state, button_active, checkbox_checked, class_available,
@@ -39,7 +39,7 @@ class SliceError(RuntimeError):
 
 
 class Bot:
-    def __init__(self, capture, inp: XdotoolInput, layout: dict) -> None:
+    def __init__(self, capture, inp: Input, layout: dict) -> None:
         self.cap = capture
         self.inp = inp
         self.cc = layout["char_create"]
@@ -270,7 +270,7 @@ def main() -> int:
         log.error("capture backend has no window_id property (add it to X11Capture)")
         return 2
 
-    bot = Bot(capture, XdotoolInput(window_id), layout)
+    bot = Bot(capture, Input(window_id), layout)
     log.info("character: %s %s %s (%s)%s", char.gender.value, char.race, char.char_class.value,
              model.value, "" if args.create else " [dry run]")
     for s in range(int(args.focus_delay), 0, -1):

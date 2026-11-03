@@ -5,7 +5,7 @@ Usage (from the project root, with WoW running fullscreen):
     python -m preflight --config characters.yaml
 
 It never clicks or types. The only input it sends is a mouse *move* over the top edge
-of the WoW window, to prove the input tool can reach the window.
+of the WoW window, to prove the input tool can reach the window. Works on Linux and Windows.
 Exit code 0 = ready (warnings allowed), 1 = something must be fixed first.
 """
 from __future__ import annotations
@@ -21,6 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 WINDOW_NAME = "World of Warcraft"
+RECOGNIZE_FOR = 10.0   # s to keep looking for a known screen (loading screens and fades)
 results: list[tuple[str, str, str]] = []  # (status, check, detail)
 
 
@@ -42,6 +43,8 @@ def check_imports() -> bool:
     mods = ["numpy", "cv2", "pytesseract", "yaml", "pydantic"]
     if sys.platform.startswith("linux"):
         mods.append("Xlib")
+    elif sys.platform == "win32":
+        mods.append("mss")
     for mod in mods:
         try:
             __import__(mod)
@@ -57,9 +60,12 @@ def check_tools() -> bool:
     good = True
     try:
         import pytesseract
+        import vision.ocr  # noqa: F401  (on Windows this finds Tesseract in Program Files)
         report("OK", "Tesseract OCR", str(pytesseract.get_tesseract_version()))
     except Exception as e:
-        report("FAIL", "Tesseract OCR", f"{e} (install: sudo apt install tesseract-ocr)")
+        how = ("install it from https://github.com/UB-Mannheim/tesseract/wiki (default folder)"
+               if sys.platform == "win32" else "sudo apt install tesseract-ocr")
+        report("FAIL", "Tesseract OCR", f"{e} ({how})")
         good = False
     if sys.platform.startswith("linux"):
         if shutil.which("xdotool"):
@@ -128,7 +134,7 @@ def check_window():
 
 def check_capture(cap, titles) -> bool:
     import cv2
-    from vision.classify import classify
+    from vision.classify import State, classify
     try:
         frame = cap.capture()
     except Exception as e:
@@ -142,43 +148,31 @@ def check_capture(cap, titles) -> bool:
         report("WARN", "Screen capture", f"frame is almost black (is WoW minimized?), saved {out}")
     else:
         report("OK", "Screen capture", f"saved {out.relative_to(ROOT)}: open it and check it looks right")
-    t = time.monotonic()
-    obs = classify(frame, titles)
-    ms = (time.monotonic() - t) * 1000
-    status = "WARN" if obs.state.value == "unknown" else "OK"
-    report(status, "Screen recognition", f"{obs.state.value.upper()} in {ms:.0f} ms"
-           + (" (fine on loading screens; go to Reconnect or char select and run again)" if status == "WARN" else ""))
+    # One frame may be a loading screen or a fade: keep looking for a while.
+    deadline = time.monotonic() + RECOGNIZE_FOR
+    while True:
+        t = time.monotonic()
+        obs = classify(frame, titles)
+        ms = (time.monotonic() - t) * 1000
+        if obs.state is not State.UNKNOWN or time.monotonic() >= deadline:
+            break
+        print(f"  screen not recognized yet ({obs.text[:50]!r}), looking again...")
+        time.sleep(1)
+        frame = cap.capture()
+    if obs.state is State.UNKNOWN:
+        cv2.imwrite(str(out), frame)
+        report("WARN", "Screen recognition",
+               f"nothing recognized for {RECOGNIZE_FOR:.0f} s (read: {obs.text[:60]!r}). Check that the "
+               f"game is in English with the required settings, and open {out.relative_to(ROOT)}")
+    else:
+        report("OK", "Screen recognition", f"{obs.state.value.upper()} in {ms:.0f} ms")
     return True
 
 
-def check_input(cap) -> None:
-    if not sys.platform.startswith("linux"):
-        report("WARN", "Mouse input", "only checked on Linux so far")
-        return
-    wid = str(cap.window_id)
-
-    def shell(*args) -> dict:
-        out = subprocess.run(["xdotool", *args, "--shell"], capture_output=True, text=True, timeout=3)
-        return dict(l.split("=", 1) for l in out.stdout.split() if "=" in l)
-
-    try:
-        win = shell("getwindowgeometry", wid)
-        subprocess.run(["xdotool", "mousemove", "--window", wid, "960", "5"], check=True, timeout=3)
-        time.sleep(0.2)
-        mouse = shell("getmouselocation")
-        dx = int(mouse["X"]) - (int(win["X"]) + 960)
-        dy = int(mouse["Y"]) - (int(win["Y"]) + 5)
-    except Exception as e:
-        report("FAIL", "Mouse input", f"xdotool couldn't move the mouse over WoW: {e}")
-        return
-    if abs(dx) <= 2 and abs(dy) <= 2:
-        report("OK", "Mouse input", "the mouse reaches the WoW window at the right spot")
-    else:
-        report("WARN", "Mouse input", f"mouse landed {dx:+d},{dy:+d} px off (display scaling on?)")
-
-    from input.xdotool import active_window_name
-    print("\n  Now click into an empty spot of the WoW window (10 s)...")
-    deadline = time.monotonic() + 10
+def check_focus() -> None:
+    from input import active_window_name
+    print("\n  Now click into an empty spot of the WoW window (15 s)...")
+    deadline = time.monotonic() + 15
     name = None
     while time.monotonic() < deadline:
         name = active_window_name()
@@ -190,7 +184,50 @@ def check_input(cap) -> None:
     elif name is None:
         report("WARN", "Focus detection", "can't detect focus here; the bot relies on you clicking into WoW")
     else:
-        report("WARN", "Focus detection", f"focused window is {name!r}, not WoW")
+        report("WARN", "Focus detection", f"focused window is {name!r}, not WoW (if WoW really was "
+               "focused, run the bot with --no-focus-check)")
+    time.sleep(0.5)
+
+
+def check_mouse(cap) -> None:
+    """Move (never click) the mouse to the top edge of WoW and check where it landed."""
+    try:
+        if sys.platform == "win32":
+            import ctypes
+            from ctypes import wintypes
+            from vision.capture.win32 import client_rect
+            left, top, _, _ = client_rect(cap.window_id)
+            ctypes.windll.user32.SetCursorPos(left + 960, top + 5)
+            time.sleep(0.2)
+            pt = wintypes.POINT()
+            ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+            dx, dy = pt.x - (left + 960), pt.y - (top + 5)
+        else:
+            wid = str(cap.window_id)
+
+            def shell(command: str, *args: str) -> dict:
+                # --shell must come right after the command: `xdotool getwindowgeometry --shell <wid>`
+                out = subprocess.run(["xdotool", command, "--shell", *args],
+                                     capture_output=True, text=True, timeout=3)
+                values = dict(l.split("=", 1) for l in out.stdout.split() if "=" in l)
+                if "X" not in values or "Y" not in values:
+                    raise RuntimeError(f"`xdotool {command}` gave no position: "
+                                       f"{(out.stderr or out.stdout).strip()!r}")
+                return values
+
+            win = shell("getwindowgeometry", wid)
+            subprocess.run(["xdotool", "mousemove", "--window", wid, "960", "5"], check=True, timeout=3)
+            time.sleep(0.2)
+            mouse = shell("getmouselocation")
+            dx = int(mouse["X"]) - (int(win["X"]) + 960)
+            dy = int(mouse["Y"]) - (int(win["Y"]) + 5)
+    except Exception as e:
+        report("FAIL", "Mouse input", f"couldn't move the mouse over WoW: {e}")
+        return
+    if abs(dx) <= 2 and abs(dy) <= 2:
+        report("OK", "Mouse input", "the mouse reaches the WoW window at the right spot")
+    else:
+        report("WARN", "Mouse input", f"mouse landed {dx:+d},{dy:+d} px off (display scaling?)")
 
 
 def main() -> int:
@@ -205,8 +242,9 @@ def main() -> int:
     cap = check_window() if tools else None
     if cap is not None:
         try:
+            check_focus()  # first: on Windows the capture sees whatever is in front
             check_capture(cap, conf[2] if conf else ["Normal", "PvP", "Roleplay", "Roleplay PvP"])
-            check_input(cap)
+            check_mouse(cap)
         finally:
             cap.close()
 

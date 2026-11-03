@@ -25,7 +25,7 @@ import yaml
 
 from config import load_characters, load_game
 from config.models import ModelType
-from input.xdotool import XdotoolInput, active_window_name
+from input import Input, active_window_name
 from scripts.slice_orc import Bot
 from states import policy
 from states.context import Context
@@ -147,7 +147,7 @@ def main() -> int:
         return 2
 
     ctx = Context(dry_run=not args.create, rehearse_fatal_as=args.rehearse_error)
-    bot = Bot(capture, XdotoolInput(capture.window_id), layout)
+    bot = Bot(capture, Input(capture.window_id), layout)
     machine = Machine(bot, game, cfg.characters, target, titles, layout, ctx, LOG_DIR / "frames")
     log.info("%d character(s), ruleset %r%s", len(cfg.characters), target,
              " [DRY RUN: stops before Finish]" if ctx.dry_run else " [CREATE]")
