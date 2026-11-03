@@ -85,6 +85,7 @@ KNOWN_ERRORS = {
     "no_realms": "no realms",
     "disconnected": "disconnected",
     "name_rule": "same letter",
+    "no_license": "license",         # account without game time: "...valid access license"
 }
 # Backup key: digits OCR more reliably than words.
 ERROR_CODES = {
@@ -92,7 +93,10 @@ ERROR_CODES = {
     "WOW51900328": "disconnected",   # network gone (cable unplugged)
     "BLZ51901016": "disconnected",   # Reconnect while the network is still gone
     "WOW51900309": "no_realms",
+    "WOW51900337": "no_license",
 }
+# Known errors that retrying can't fix: the dialog becomes FATAL and the bot stops.
+FATAL_ERRORS = ("no_license",)
 
 # ---- Ruleset cards
 TITLE_GOLD_S_MIN = 60      # looser than GOLD_*: also catches dim (greyed) titles
@@ -243,7 +247,8 @@ def read_dialog(frame: np.ndarray, box: tuple[int, int, int, int] | None = DIALO
     texts = [normalize(l.text) for l in lines]
     joined = " ".join(texts)
 
-    code = re.search(ERROR_CODE_RE, joined)
+    # OCR sometimes splits the code ("WOW519003 37"): join digits before searching.
+    code = re.search(ERROR_CODE_RE, re.sub(r"(?<=\d) (?=\d)", "", joined))
     error_code = code.group(0).upper() if code else None
     known = match_known(joined) or ERROR_CODES.get(error_code or "")
 
@@ -265,6 +270,8 @@ def read_dialog(frame: np.ndarray, box: tuple[int, int, int, int] | None = DIALO
 
     if any(m in joined for m in FATAL_MESSAGES):
         return Dialog(DialogKind.FATAL, message, error_code, okay=okay)
+    if known in FATAL_ERRORS:
+        return Dialog(DialogKind.FATAL, message, error_code, okay=okay, known=known)
     if QUEUE_MESSAGE in joined:
         pos = re.search(QUEUE_POSITION_RE, joined)
         return Dialog(DialogKind.QUEUE, message, queue_position=int(pos.group(1)) if pos else None)

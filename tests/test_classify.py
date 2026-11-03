@@ -27,6 +27,8 @@ PREFIXES = {
     "unknown": State.UNKNOWN,
     "fatal": State.FATAL,
     "error_dialog": State.ERROR,       # full frames only; crops live in approx/
+    "error_dialog_no_license": State.FATAL,   # in FATAL_ERRORS: retrying can't help
+    "realm_list": State.REALM_LIST,
 }
 
 

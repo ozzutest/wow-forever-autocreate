@@ -80,6 +80,7 @@ def test_logging_in_dialog(path):
     ("you have been disconnected from the server", "disconnected"),
     ("no realms are currently available", "no_realms"),
     ("you cant use the same letter three times", "name_rule"),
+    ("access to this realm requires an account witha valid access license", "no_license"),
     ("some message we have never seen", None),
 ])
 def test_match_known_tolerates_ocr_typos(text, key):

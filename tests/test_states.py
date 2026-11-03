@@ -287,6 +287,34 @@ def test_rehearsal_handles_fatal_as_throttle():
     assert not ctx.finish_clicked and not ctx.fresh_customize   # retry with a fresh name check
 
 
+NO_LICENSE = "error_dialog_no_license_01.png"   # live: account without game time
+
+
+def test_no_license_stops(tmp_path):
+    m, ctx, bot = machine([char(("A", "B"))], tmp_path=tmp_path)
+    obs, out = run(m, NO_LICENSE)
+    assert obs.state is State.FATAL and out is Outcome.STOP
+    (x, y), = bot.inp.clicks                     # Okay, then stop
+    assert abs(x - 959) < 20 and abs(y - 575) < 12
+    assert list(tmp_path.glob("*_fatal_no_license.png"))
+
+
+def test_no_license_is_never_rehearsed(tmp_path):
+    m, ctx, bot = machine([char(("A", "B"))], tmp_path=tmp_path)
+    ctx.rehearse_fatal_as = "throttled"
+    _, out = run(m, NO_LICENSE)
+    assert out is Outcome.STOP and ctx.throttle_count == 0 and ctx.last_error is None
+
+
+# --------------------------------------------------------------- realm list
+
+def test_realm_list_clicks_cancel():
+    m, ctx, bot = machine([char(("A", "B"))])
+    obs, out = run(m, "realm_list_01.png")
+    assert obs.state is State.REALM_LIST and out is Outcome.CONTINUE
+    assert bot.inp.clicks == [tuple(LAYOUT["realm_list"]["cancel"])]
+
+
 # ------------------------------------------------------------ stuck watchdog
 
 def test_repeated_clicks_without_progress_escalate(tmp_path):

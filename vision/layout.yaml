@@ -55,3 +55,6 @@ ruleset_select:
 
 reconnect:
   reconnect: [958, 538]
+
+realm_list:
+  cancel: [1187, 764]                 # closes the list without picking a realm

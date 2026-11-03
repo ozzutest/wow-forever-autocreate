@@ -159,6 +159,12 @@ class Machine:
         self.navigate(point, State.RECONNECT, 10.0)
         return Outcome.CONTINUE
 
+    def on_realm_list(self, obs, frame) -> Outcome:
+        # We never pick a realm by hand: the ruleset screen does that. Close the list.
+        log.info("realm list open: Cancel")
+        self.navigate(self.L["realm_list"]["cancel"], State.REALM_LIST)
+        return Outcome.CONTINUE
+
     def on_login_form(self, obs, frame) -> Outcome:
         log.error("login form: the session is gone, log in by hand (screenshot: %s)",
                   self.save(frame, "login_form"))
@@ -189,7 +195,14 @@ class Machine:
         return Outcome.CONTINUE
 
     def on_fatal(self, obs, frame) -> Outcome:
-        if self.ctx.rehearse_fatal_as:
+        if obs.dialog.known == "no_license":
+            log.error("this account has no active game time (%s): it can't enter any realm, so the "
+                      "bot can't create characters on it. Screenshot: %s", obs.dialog.error_code or "-",
+                      self.save(frame, "fatal_no_license").name)
+            self._okay(obs)
+            return Outcome.STOP
+        # Rehearsal only stands in for the "maximum number" popup, never for a real fatal error.
+        if self.ctx.rehearse_fatal_as and obs.dialog.known is None:
             log.warning("REHEARSAL: handling %r as %s", obs.dialog.message, self.ctx.rehearse_fatal_as)
             return self._error(obs, frame, self.ctx.rehearse_fatal_as)
         log.error("fatal: %r (screenshot: %s)", obs.dialog.message, self.save(frame, "fatal"))

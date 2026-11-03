@@ -2,10 +2,11 @@
 
 Order matters:
 1. Dialogs (they overlay every screen): read_dialog on the center box.
-2. Center screens without a dialog: Reconnect, login form (same OCR pass, reused).
-3. Ruleset select: the gold subtitle under "Choose Your Gameplay Ruleset".
-4. Char screens: labels in the bottom band (see char_screen()).
-5. Anything else is UNKNOWN (loading screens, fades): the runner waits.
+2. Realm list ("Realm Selection" window): its title, above the dialog box.
+3. Center screens without a dialog: Reconnect, login form (same OCR pass, reused).
+4. Ruleset select: the gold subtitle under "Choose Your Gameplay Ruleset".
+5. Char screens: labels in the bottom band (see char_screen()).
+6. Anything else is UNKNOWN (loading screens, fades): the runner waits.
 
 Calibrated on 1920x1080 fixtures. Worst case is three OCR passes, about 1 s per frame,
 which is plenty for a bot that mostly waits.
@@ -22,6 +23,8 @@ from vision.ocr import (
     read_dialog, read_lines, read_rulesets,
 )
 
+REALM_TITLE_BOX = (820, 270, 1120, 312)       # "Realm Selection" (only "Realm" survives MIN_CONF)
+REALM_TITLE_LABEL = "realm"
 SUBTITLE_BOX = (560, 180, 1360, 260)          # "You will only be able to interact ... same ruleset."
 BOTTOM_BAND = (0, 940, 1920, 1080)            # Back, Create Character, Customize, Finish, Select...
 CHAR_SELECT_TITLE_BAND = (1530, 115, 1910, 145)  # ruleset title above the character list
@@ -43,6 +46,7 @@ class State(Enum):
     ERROR = "error"
     FATAL = "fatal"
     RECONNECT = "reconnect"
+    REALM_LIST = "realm_list"
     LOGIN_FORM = "login_form"
     RULESET_SELECT = "ruleset_select"
     CHAR_SELECT = "char_select"
@@ -75,6 +79,10 @@ def classify(frame: np.ndarray, ruleset_titles: list[str]) -> Observation:
     dialog = read_dialog(frame, DIALOG_BOX)
     if dialog.kind in _DIALOG_STATES:
         return Observation(_DIALOG_STATES[dialog.kind], dialog=dialog, text=dialog.message)
+
+    # The realm list fills the dialog box with realm names, which read_dialog sees as NONE.
+    if fuzzy_contains(_joined(frame, REALM_TITLE_BOX), REALM_TITLE_LABEL):
+        return Observation(State.REALM_LIST, text=normalize(dialog.message)[:80])
 
     center = normalize(dialog.message)
     if fuzzy_contains(center, "email or phone") or fuzzy_contains(center, "password"):

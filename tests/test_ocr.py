@@ -68,6 +68,15 @@ def test_error_with_code():
 
 
 
+def test_no_license_is_fatal_with_split_code():
+    # Account without game time. OCR reads the code as "WOW519003 37": the digits are joined.
+    d = read_dialog(load(FIX / "error_dialog_no_license_01.png"))
+    assert d.kind is DialogKind.FATAL
+    assert d.known == "no_license"
+    assert d.error_code == "WOW51900337"
+    assert d.okay is not None
+
+
 TITLES = ["Normal", "PvP", "Roleplay", "Roleplay PvP"]  # values of rulesets in races.yaml
 
 
