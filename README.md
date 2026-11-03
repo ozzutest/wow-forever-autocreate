@@ -68,6 +68,10 @@ Automating game input may be against Blizzard's terms of service. Use it at your
 
 ## Quick start (technical)
 
+Step-by-step instructions for non-technical users, on both systems, are in [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
+
+### Linux (Pop!_OS / Ubuntu)
+
 ```bash
 sudo apt install tesseract-ocr xdotool
 python3 -m venv .venv && source .venv/bin/activate
@@ -77,6 +81,24 @@ python -m preflight                            # checks everything, clicks nothi
 python -m runner                               # dry run
 python -m runner --create                      # the real thing
 ```
+
+### Windows 10/11
+
+1. Install [Python](https://www.python.org/downloads/) 3.12 or newer, with **"Add python.exe to PATH"** ticked.
+2. Install Tesseract with the [UB Mannheim installer](https://github.com/UB-Mannheim/tesseract/wiki) into its **default folder** (the bot finds it there without PATH changes).
+3. In **Command Prompt** (not PowerShell), from the project folder:
+
+```bat
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+copy characters.example.yaml characters.yaml
+python -m preflight
+python -m runner
+python -m runner --create
+```
+
+On Windows the bot grabs the screen area of the WoW window, so WoW must stay in front: the bot pauses whenever it isn't. If the monitor is bigger than 1920×1080, set the Windows desktop resolution to 1920×1080, because "Fullscreen (Windowed)" always takes the desktop's size. Display scaling (125%, 150%) is handled.
 
 ## Project layout
 
