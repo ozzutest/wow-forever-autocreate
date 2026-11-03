@@ -41,7 +41,7 @@ The bot clicks at exact spots on the screen, so these settings **must** match. O
 - **Render Scale:** 100% (the text next to the slider says `1920x1080 (100%)`)
 - **Use UI Scale:** off (the box is empty)
 
-![The four setings are necessary in order to run the script correctly](screenshots/recommended-settings.png)
+![The four setings are necessary in order to run the script correctly](../screenshots/recommended-settings.png)
 
 Then, under **System → Languages and Social**, make sure the game language is **English**.
 
