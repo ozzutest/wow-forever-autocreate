@@ -9,6 +9,16 @@ import subprocess
 import time
 
 
+def active_window_name() -> str | None:
+    """Title of the focused X window, or None if xdotool can't tell (e.g. no X window focused)."""
+    try:
+        out = subprocess.run(["xdotool", "getactivewindow", "getwindowname"],
+                             capture_output=True, text=True, timeout=2)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return out.stdout.strip() if out.returncode == 0 and out.stdout.strip() else None
+
+
 class XdotoolInput:
     def __init__(self, window_id: int, type_delay_ms: int = 80, settle: float = 0.15) -> None:
         self._wid = str(window_id)

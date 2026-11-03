@@ -6,7 +6,9 @@ Usage (from the project root, WoW running fullscreen at 1920x1080):
     python -m runner --config characters.test.yaml
     python -m runner --create --rehearse-error throttled   # full account: test the retry loop
 
-After starting, click into the WoW window within the countdown and don't touch anything.
+You can start it right after launching WoW: it waits for the window. Then click into an
+empty spot of the WoW window; the bot starts as soon as WoW has focus, and pauses whenever
+WoW loses focus.
 Logs: logs/run_*.log; screenshots of every error and unknown screen: logs/frames/.
 Ctrl+C stops it.
 """
@@ -23,7 +25,7 @@ import yaml
 
 from config import load_characters, load_game
 from config.models import ModelType
-from input.xdotool import XdotoolInput
+from input.xdotool import XdotoolInput, active_window_name
 from scripts.slice_orc import Bot
 from states import policy
 from states.context import Context
@@ -35,8 +37,56 @@ ROOT = Path(__file__).resolve().parent
 LOG_DIR = ROOT / "logs"
 log = logging.getLogger("bot")
 
+WINDOW_NAME = "World of Warcraft"
 POLL = 1.0           # s between frames (classify itself takes up to ~1 s)
 ERROR_PAUSE = 5.0    # s after an unexpected exception before trying again
+WINDOW_WAIT = 300.0  # s to wait for the WoW window (and fullscreen size) at startup
+
+
+def wow_focused() -> bool | None:
+    """True/False if we can tell whether WoW has keyboard focus, None if we can't."""
+    name = active_window_name()
+    return None if name is None else name == WINDOW_NAME
+
+
+def wait_for_window(size: tuple[int, int], timeout: float):
+    """Capture for the WoW window once it exists at the right size, or None on timeout."""
+    deadline, last_log = time.monotonic() + timeout, 0.0
+    while True:
+        try:
+            cap = make_capture(WINDOW_NAME)
+            if cap.size() == size:
+                return cap
+            why = f"window is {cap.size()}, need {size} fullscreen"
+            cap.close()
+        except Exception as e:  # no window yet, DISPLAY not set, ...
+            why = str(e) or type(e).__name__
+        if time.monotonic() >= deadline:
+            log.error("no usable WoW window: %s", why)
+            return None
+        if time.monotonic() - last_log >= 15:
+            last_log = time.monotonic()
+            log.info("waiting for the WoW window (%s)", why)
+        time.sleep(2)
+
+
+def wait_for_focus(seconds: float) -> None:
+    """Return as soon as WoW has focus, or after `seconds` (fallback countdown)."""
+    end = time.monotonic() + seconds
+    focused = None
+    while (left := end - time.monotonic()) > 0:
+        focused = wow_focused()
+        if focused:
+            print()
+            log.info("WoW has focus: starting")
+            return
+        print(f"\rclick into an empty spot of the WoW window... {left:4.0f} s ", end="", flush=True)
+        time.sleep(0.5)
+    print()
+    if focused is None:
+        log.warning("can't detect focus here: assuming WoW is focused")
+    else:
+        log.warning("WoW doesn't have focus; the bot pauses until you click into it")
 
 
 def _value(x):
@@ -60,7 +110,10 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config", default="characters.yaml")
     ap.add_argument("--create", action="store_true", help="click Finish (default: dry run)")
-    ap.add_argument("--focus-delay", type=float, default=10.0)
+    ap.add_argument("--focus-delay", type=float, default=60.0,
+                    help="max seconds to wait for you to click into WoW (starts as soon as it's focused)")
+    ap.add_argument("--no-focus-check", action="store_true",
+                    help="don't pause when WoW seems unfocused (if focus detection misreports here)")
     ap.add_argument("--rehearse-error", choices=policy.REHEARSABLE, metavar="KEY",
                     help="testing on a full account: treat the 'maximum number of characters' "
                          "popup after Finish as this error and keep retrying "
@@ -89,9 +142,8 @@ def main() -> int:
     target = _title(game.rulesets[_value(cfg.ruleset)])
     layout = yaml.safe_load((ROOT / "vision" / "layout.yaml").read_text(encoding="utf-8"))
 
-    capture = make_capture("World of Warcraft")
-    if capture.size() != tuple(layout["window_size"]):
-        log.error("window is %s, layout expects %s", capture.size(), layout["window_size"])
+    capture = wait_for_window(tuple(layout["window_size"]), WINDOW_WAIT)
+    if capture is None:
         return 2
 
     ctx = Context(dry_run=not args.create, rehearse_fatal_as=args.rehearse_error)
@@ -103,14 +155,22 @@ def main() -> int:
         log.warning("REHEARSAL: the character-limit popup counts as %r. Only run this on a FULL "
                     "account, or Finish will really create the character. Ctrl+C to stop.",
                     ctx.rehearse_fatal_as)
-    for s in range(int(args.focus_delay), 0, -1):
-        print(f"\rclick into WoW now... {s} ", end="", flush=True)
-        time.sleep(1)
-    print()
+    wait_for_focus(args.focus_delay)
 
     last: State | None = None
+    paused = False
     try:
         while True:
+            # Never send input to another window (notification, screen lock, terminal).
+            if not args.no_focus_check and wow_focused() is False:
+                if not paused:
+                    log.warning("WoW lost focus: paused (click into WoW to continue)")
+                    paused = True
+                time.sleep(POLL)
+                continue
+            if paused:
+                log.info("WoW focused again: resuming")
+                paused = False
             try:
                 frame = capture.capture()
                 obs = classify(frame, titles)

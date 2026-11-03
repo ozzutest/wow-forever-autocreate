@@ -1,0 +1,18 @@
+# Python 3.11 or newer. Install with:  pip install -r requirements.txt
+#
+# Also needed, outside Python (Pop!_OS / Ubuntu):
+#   sudo apt install tesseract-ocr xdotool
+
+numpy>=1.26
+opencv-python>=4.8
+pytesseract>=0.3.10
+PyYAML>=6.0
+pydantic>=2.5
+
+# Screen capture: the WoW window's own pixels (Linux / XWayland)
+python-xlib>=0.33; sys_platform == "linux"
+# Windows backend (planned)
+mss>=9.0; sys_platform == "win32"
+
+# Tests (python -m pytest)
+pytest>=8.0
